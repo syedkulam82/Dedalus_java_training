@@ -123,11 +123,13 @@ declare
    x number :=0;
 begin
     loop
-       dbms_output.put_line(' x : ' || x);  
+       dbms_output.put_line(' x  : ' || x);  
        x:=x+1;
-       if x=5 then exit;
+       if x=5 then 
+        exit;
        end if;    
     end loop;
+      
 end;
 /
 
@@ -279,3 +281,199 @@ begin
 end;
 /
 -----------------------------------------------------
+
+EXERCISE
+--------
+--To write a  Cursor to display the list of employees who are Working as a Managers or Analyst.
+declare
+    emprec emp%rowtype;
+    cursor mycur is select * from emp where job in ('MANAGER', 'ANALYST');
+begin
+    open mycur;
+    loop
+    fetch mycur into emprec;
+    exit when mycur%NOTFOUND;    
+    dbms_output.put_line(emprec.empno || '     ' || emprec.ename || '    ' || emprec.deptno || emprec.job); 
+    end loop;
+    close mycur;
+end;
+
+--Write PL/SQL code in Cursor to display employee names and salary
+declare
+    emprec emp%rowtype;
+    cursor mycur is select * from emp;
+begin
+    open mycur;
+    loop
+    fetch mycur into emprec;
+    exit when mycur%NOTFOUND;    
+    dbms_output.put_line(emprec.ename || '    ' || emprec.sal); 
+    end loop;
+    close mycur;
+end;
+
+--Write PL/SQL code in Procedure to find the Reverse of the  number
+DECLARE
+num number;
+reverse_num number:=0;
+
+begin
+num:=98765;
+while num>0
+loop
+reverse_num:=(reverse_num*10) + mod(num,10);
+num:=trunc(num/10);
+end loop;
+
+dbms_output.put_line(' Reversed number is : '|| reverse_num);
+end;
+/
+
+Begin
+dbms_output.put_line(' Reversed number is : ');
+end;
+
+
+
+
+
+
+-----------------------------------------------------
+To write a  Cursor to display the list of employees who are Working as a Managers or Analyst.
+
+DECLARE
+      cursor c(jb varchar2) is select ename from emp where job=jb; 
+em emp.job%type;
+BEGIN
+  open c('MANAGER');
+    dbms_output.put_line(' EMPLOYEES WORKING AS MANAGERS ARE:');
+  loop
+  fetch c into em;
+  exit when c%notfound;
+  dbms_output.put_line(em);
+  end loop;
+  close c;
+
+  open c('ANALYST');dbms_output.put_line(' EMPLOYEES WORKING AS ANALYST ARE:');
+  loop
+  fetch c into em;
+  exit when c%notfound;
+    dbms_output.put_line(em);
+  end loop;
+  close c;
+END;
+/
+----------------------------------------
+Exception handling:
+  --> Error which occurs during the runtime
+
+declare
+  eno emp.empno%type;
+  enam emp.ename%type;
+  salry emp.sal%type;
+  
+  v_error_code number(20);
+  v_error_msg varchar2(235);
+begin
+    select empno,ename,sal into eno,enam,salry from emp where empno>&no;
+    dbms_output.put_line('Empno :' || eno || ' Emp Name :   ' || enam  || ' Salary :   ' || salry);
+    
+   -- salry :=salry/0;
+    --dbms_output.put_line(' Salary :   ' || salry);
+    
+   insert into batch210(stid,sname,deptno) values(100,'Karthik',1);
+exception
+     when NO_DATA_FOUND then
+         dbms_output.put_line('Employee Number Does Not Exist :(');
+    when ZERO_DIVIDE then
+         dbms_output.put_line('Dont divide by 0');
+    -- when others then
+      --      v_error_code:=SQLCODE;
+        --    v_error_msg :=SQLERRM;
+          -- dbms_output.put_line('Plz contact Admin to resolve error with code ' || v_error_code || ' and msg ' ||  v_error_msg);         
+end;
+/
+
+set verify off;
+--The functions SQLCODE and SQLERRM are especially useful in the OTHERS handler
+--because they return the Oracle error code and message text. 
+
+-----------------------------------------------------------
+User Defined Exception:
+-----------------------------------
+1) Declare the Exception
+2) Raise the exception
+3) Handle the exception
+
+declare
+    eno emp.empno%type;
+    enam emp.ename%type;
+    emp_not_found EXCEPTION;   -- Declare
+begin
+    eno :=&no;
+    if eno>9000 then
+       RAISE emp_not_found;             -- Raise
+    else
+       select ename into enam from emp where empno=eno;
+        dbms_output.put_line('Ename : '|| enam);
+    end if;
+exception
+     when emp_not_found then            --handle
+         dbms_output.put_line('Emp Number  : '|| eno || ' not found ');
+end;
+/
+---------------------------
+
+Procedure raise_application_error(error_number, message[, {TRUE | FALSE}]);
+
+where error_number is a negative integer in the range -20000 .. -20999 and 
+message is a character string up to 2048 bytes long.
+
+declare
+    eno emp.empno%type;
+    enam emp.ename%type;
+    emp_not_found EXCEPTION;   -- Declare
+begin
+    eno :=&no;
+    if eno>9000 then
+       RAISE_APPLICATION_ERROR(-20456,'NOT  A VALID EMPLOYEE NUMBER');             -- Raise
+    else
+       select ename into enam from emp where empno=eno;
+        dbms_output.put_line('Ename : '|| enam);
+    end if;
+exception
+     when emp_not_found then            --handle
+         RAISE_APPLICATION_ERROR(-20456,'NOT  A VALID EMPLOYEE NUMBER');  
+         dbms_output.put_line('Emp Number  : '|| eno || ' not found ');
+end;
+/
+select * from emp;
+
+---------------------------------------------------------------------
+PRAGMA EXCEPTION
+------------------------------------
+
+declare
+  eno emp.empno%type;
+  enam emp.ename%type;
+  salry emp.sal%type;
+  
+  v_error_code number(20);
+  v_error_msg varchar2(235);
+  Toooooooo_many_rooooows  EXCEPTION;                 -- Declare the exception
+  PRAGMA EXCEPTION_INIT(Toooooooo_many_rooooows, -01422);  -- map the name of the exception with error code
+  
+begin
+    select empno,ename,sal into eno,enam,salry from emp where empno>&no;
+    dbms_output.put_line('Empno :' || eno || ' Emp Name :   ' || enam  || ' Salary :   ' || salry);    
+    
+exception
+     when Toooooooo_many_rooooows then              --- handle the exception
+         dbms_output.put_line('Fetching tooo many employees.');
+ 
+     when others then
+            v_error_code:=SQLCODE;
+            v_error_msg :=SQLERRM;
+           dbms_output.put_line('Plz contact Admin to resolve error with code ' || v_error_code || ' and msg ' ||  v_error_msg);         
+end;
+/
